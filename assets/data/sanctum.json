@@ -25,7 +25,7 @@
           "Fabricator-Général Horgell Dyass",
           "Légion Titanique entièrement loyale"
         ],
-        "occupation_flag": "mechanicus"
+        "occupation_flag": "black-templars"
       },
       {
         "id": 2,
@@ -43,7 +43,7 @@
           "Théâtre d'affrontements actifs",
           "Seigneur Arbites Agostus Bheld — signataire de la Croisade"
         ],
-        "occupation_flag": "chaos"
+        "occupation_flag": "death-guard"
       },
       {
         "id": 3,
@@ -61,7 +61,7 @@
           "Extraction de ressources énergétiques",
           "Approvisionnement des forges de Sanctum"
         ],
-        "occupation_flag": "mechanicus"
+        "occupation_flag": "adeptus-mechanicus"
       },
       {
         "id": 4,
@@ -79,7 +79,7 @@
           "Production d'engrais et gaz de refroidissement",
           "Surface : glaces éternelles"
         ],
-        "occupation_flag": "imperium"
+        "occupation_flag": "black-templars"
       },
       {
         "id": 5,
@@ -97,7 +97,7 @@
           "Dérivés énergétiques : benzène",
           "Perturbé par le nouveau chemin warp naissant"
         ],
-        "occupation_flag": "imperium"
+        "occupation_flag": "black-templars"
       }
     ],
     "bastions": [

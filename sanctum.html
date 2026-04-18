@@ -290,14 +290,17 @@
       <div class="editor-row">
         <label for="faction-select">Faction du drapeau</label>
         <select id="faction-select">
-          <option value="imperium">Imperium</option>
-          <option value="mechanicus">Mechanicus</option>
           <option value="black-templars">Black Templars</option>
-          <option value="inquisition">Inquisition</option>
-          <option value="chaos">Chaos</option>
-          <option value="neutral">Neutre</option>
+          <option value="silver-templars">Silver Templars</option>
+          <option value="death-guard">Death Guard</option>
+          <option value="necrons">Nécrons</option>
+          <option value="adeptus-mechanicus">Adeptus Mechanicus</option>
+          <option value="votann">Votann</option>
+          <option value="world-eaters">World Eaters</option>
+          <option value="blood-angels">Blood Angels</option>
+          <option value="iron-warriors">Iron Warriors de Khorne</option>
+          <option value="garde-imperiale">Garde Impériale</option>
         </select>
-      </div>
 
       <div class="editor-row">
         <label for="ship-type">Type de vaisseau</label>
@@ -306,7 +309,7 @@
           <option value="cuirasse">Cuirassé</option>
           <option value="transport">Transport</option>
           <option value="escorte">Escorte</option>
-          <option value="special">Vaisseau spécial</option>
+          <option value="gloriana">Gloriana</option>
         </select>
       </div>
 
@@ -342,12 +345,16 @@
   };
 
   const FACTION_FLAG_STYLES = {
-    imperium: { label: 'Imperium', color: '#4488dd', short: 'IMP' },
-    mechanicus: { label: 'Mechanicus', color: '#33aaaa', short: 'MEC' },
-    'black-templars': { label: 'Black Templars', color: '#c8a028', short: 'BT' },
-    inquisition: { label: 'Inquisition', color: '#7aa6ff', short: 'INQ' },
-    chaos: { label: 'Chaos', color: '#c43030', short: 'CHS' },
-    neutral: { label: 'Neutre', color: '#999999', short: 'NEU' }
+    'black-templars':    { label: 'Black Templars',        color: '#c8a028', short: 'BT'  },
+    'silver-templars':   { label: 'Silver Templars',       color: '#aaccff', short: 'ST'  },
+    'death-guard':       { label: 'Death Guard',           color: '#6b8c3a', short: 'DG'  },
+    'necrons':           { label: 'Nécrons',               color: '#33ffcc', short: 'NEC' },
+    'adeptus-mechanicus':{ label: 'Adeptus Mechanicus',    color: '#33aaaa', short: 'AM'  },
+    'votann':            { label: 'Votann',                color: '#d4882a', short: 'VOT' },
+    'world-eaters':      { label: 'World Eaters',          color: '#c43030', short: 'WE'  },
+    'blood-angels':      { label: 'Blood Angels',          color: '#cc1111', short: 'BA'  },
+    'iron-warriors':     { label: 'Iron Warriors de Khorne', color: '#8855cc', short: 'IW' },
+    'garde-imperiale':   { label: 'Garde Impériale',       color: '#4488dd', short: 'GI'  }
   };
 
   const SHIP_STYLES = {
@@ -355,7 +362,7 @@
     cuirasse: { color: '#c43030', short: 'BS' },
     transport: { color: '#55aa66', short: 'TR' },
     escorte: { color: '#c8a028', short: 'ES' },
-    special: { color: '#bb88ff', short: 'SP' }
+    gloriana: { color: '#bb88ff', short: 'GL' }
   };
 
   function statusClass(status) {

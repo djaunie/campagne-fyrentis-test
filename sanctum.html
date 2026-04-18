@@ -701,7 +701,15 @@
       document.getElementById('sb-title').textContent = sys.name;
 
       buildOrrery(sys);
-      bindClicks(sys);
+	  // Charger les drapeaux depuis le JSON
+	  if (sys.planets) {
+		  sys.planets.forEach(p => {
+			if (p.occupation_flag) state.flags[String(p.id)] = p.occupation_flag;});}
+		// Charger les vaisseaux depuis le JSON
+		if (sys.ships) {
+		  state.ships = sys.ships.map(s => ({ ...s }));
+		  state.shipCounter = sys.ships.length;		}
+	  bindClicks(sys);
       bindEditor();
       renderBastions(sys.bastions);
       renderWarpAlert(sys.warp_route);

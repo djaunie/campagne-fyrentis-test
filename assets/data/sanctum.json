@@ -98,29 +98,51 @@
           "Perturbé par le nouveau chemin warp naissant"
         ],
         "occupation_flag": "black-templars"
-      }
-    ],
-    "bastions": [
+      },
       {
+        "id": 6,
         "name": "Bastion Alpha",
+        "orbital_position": 6,
+        "orbital_distance_au": 4,
         "type": "Fortin stellaire — Garnison Astartes",
-        "status": "Opérationnel — Lourdement armé",
-        "status_class": "status--ok",
-        "description": "Fortin stellaire lourdement armé, doté d'une garnison Astartes des Black Templars. Première ligne de défense du système."
+        "imperial_status": "Opérationnel — Lourdement armé",
+        "description": "Fortin stellaire lourdement armé, doté d'une garnison Astartes des Black Templars. Première ligne de défense du système",
+        "danger_level": 2,
+        "color_hex": "#b0d8f0",
+        "notable_features": [
+          "Non communiqué"
+        ],
+        "occupation_flag": "black-templars"
       },
       {
+        "id": 7,
         "name": "Bastion Beta",
+        "orbital_position": 7,
+        "orbital_distance_au": 3,
         "type": "Forteresse stellaire — En construction",
-        "status": "Inachevé — Vulnérable",
-        "status_class": "status--warn",
-        "description": "Encore inachevé, facilement accessible. Sa complétion est une priorité urgente du Mechanicus et des Black Templars."
+        "imperial_status": "Inachevé — Vulnérable",
+        "description": "Encore inachevé, facilement accessible. Sa complétion est une priorité urgente du Mechanicus et des Black Templars.",
+        "danger_level": 2,
+        "color_hex": "#b0d8f0",
+        "notable_features": [
+          "Non communiqué"
+        ],
+        "occupation_flag": "black-templars"
       },
       {
+        "id": 8,
         "name": "Brokha — Bastion Chapitral",
+        "orbital_position": 8,
+        "orbital_distance_au": 1.1,
         "type": "Forteresse lune — QG Black Templars",
-        "status": "Opérationnel — QG de Croisade",
-        "status_class": "status--ok",
-        "description": "Forteresse stellaire lourde implantée sur la lune Brokha. Siège de la présence des Black Templars et QG de la Croisade Fyrentis."
+        "imperial_status": "Opérationnel — QG de Croisade",
+        "description": "Forteresse stellaire lourde implantée sur la lune Brokha. Siège de la présence des Black Templars et QG de la Croisade Fyrentis.",
+        "danger_level": 5,
+        "color_hex": "#b0d8f0",
+        "notable_features": [
+          "Non communiqué"
+        ],
+        "occupation_flag": "black-templars"
       }
     ],
     "warp_route": {

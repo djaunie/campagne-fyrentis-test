@@ -138,9 +138,9 @@
     "ships": [
       {
         "id": "ship-1",
-        "name": "Poing de Metallica",
-        "type": "cuirasse",
-        "faction": "mechanicus",
+        "name": "Endurance",
+        "type": "gloriana",
+        "faction": "Death Guard",
         "x": 390,
         "y": 170
       },
@@ -148,15 +148,15 @@
         "id": "ship-2",
         "name": "Croisade Éternelle",
         "type": "croiseur",
-        "faction": "black-templars",
+        "faction": "Black Templars",
         "x": 280,
         "y": 200
       },
       {
         "id": "ship-3",
-        "name": "Aquila Ferrum",
-        "type": "special",
-        "faction": "inquisition",
+        "name": "Conqueror",
+        "type": "gloriana",
+        "faction": "World Eaters",
         "x": 450,
         "y": 310
       }

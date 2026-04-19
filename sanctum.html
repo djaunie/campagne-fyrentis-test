@@ -70,10 +70,6 @@
     .planet-label { font-family: 'Cinzel', serif; font-size: 8px; fill: var(--text); pointer-events: none; }
     .planet-sublabel { font-size: 7px; fill: var(--muted); pointer-events: none; font-family: 'Crimson Text', serif; font-style: italic; }
 
-    /* Bastion / station markers */
-    .marker-group { cursor: pointer; }
-    .marker-group:hover polygon, .marker-group:hover rect { opacity: 0.9; }
-
     /* Danger pips */
     @keyframes danger-blink { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
     .danger-4 .planet-bg { animation: danger-blink 1.8s ease-in-out infinite; }
@@ -106,17 +102,6 @@
     .danger-bar { display: flex; gap: 3px; margin-top: 0.5rem; }
     .danger-pip { width: 14px; height: 6px; border-radius: 2px; background: var(--faint); }
     .danger-pip.on { background: var(--red-bright); }
-
-    /* BASTIONS SECTION */
-    .bastions-section { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
-    .bastions-section h3 { font-family: 'Cinzel', serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-dim); margin-bottom: 0.7rem; }
-    .bastion-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .bastion-card { padding: 0.6rem 0.75rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; }
-    .bastion-name { font-family: 'Cinzel', serif; font-size: 0.78rem; color: var(--text); margin-bottom: 0.15rem; }
-    .bastion-status { font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 999px; display: inline-block; margin-bottom: 0.3rem; }
-    .status--ok { background: rgba(42,107,48,0.2); color: var(--green-bright); border: 1px solid var(--green); }
-    .status--warn { background: rgba(200,90,26,0.2); color: var(--orange-bright); border: 1px solid var(--orange); }
-    .bastion-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
 
     /* WARP ALERT */
     .warp-alert { margin: 0.75rem 1.25rem 1rem; padding: 0.65rem 0.85rem; background: rgba(122,92,158,0.12); border: 1px solid rgba(122,92,158,0.4); border-radius: 4px; }
@@ -273,12 +258,6 @@
         <div class="empty-state-icon">◈</div>
         <p>Sélectionne un monde sur la carte pour afficher les données de reconnaissance.</p>
       </div>
-    </div>
-
-    <!-- BASTIONS (injecté par JS) -->
-    <div class="bastions-section" id="bastions-section" style="display:none">
-      <h3>Fortifications du Système</h3>
-      <div class="bastion-list" id="bastion-list"></div>
     </div>
 
     <!-- WARP ALERT (injecté par JS) -->
@@ -658,18 +637,6 @@
     });
   }
 
-  function renderBastions(bastions) {
-    if (!bastions || !bastions.length) return;
-    document.getElementById('bastions-section').style.display = '';
-    document.getElementById('bastion-list').innerHTML = bastions.map(b =>
-      `<div class="bastion-card">
-        <div class="bastion-name">${b.name}</div>
-        <span class="bastion-status ${b.status_class}">${b.status}</span>
-        <p class="bastion-desc">${b.description}</p>
-      </div>`
-    ).join('');
-  }
-
   function renderWarpAlert(warp) {
     if (!warp) return;
     document.getElementById('warp-alert-zone').innerHTML =
@@ -718,7 +685,6 @@
 		  state.shipCounter = sys.ships.length;		}
 	  bindClicks(sys);
       bindEditor();
-      renderBastions(sys.bastions);
       renderWarpAlert(sys.warp_route);
       renderFigures(sys.key_figures);
       renderFlags();

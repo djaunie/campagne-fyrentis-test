@@ -144,12 +144,12 @@
         "imperial_status": "Opérationnel — QG de Croisade",
         "description": "Forteresse stellaire lourde implantée sur la lune Brokha. Siège de la présence des Black Templars et QG de la Croisade Fyrentis.",
         "danger_level": 5,
-        "color_hex": "#d4a828",
+        "color_hex": "#b0d8f0",
         "notable_features": [
           "QG de la Croisade Fyrentis",
+          "Garnison Astartes Black Templars",
           "Forteresse stellaire lourde",
-          "Garnison Astartes permanente",
-          "Commandement — Sénéchal Manfred"
+          "Sénéchal Manfred — commandant en chef"
         ],
         "occupation_flag": "black-templars"
       }

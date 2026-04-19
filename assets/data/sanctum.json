@@ -136,30 +136,6 @@
       { "nom": "Zhanarius Ash-Bhaar", "role": "Fabricateur-Général successeur", "faction": "Mechanicus" }
     ],
     "ships": [
-      {
-        "id": "ship-1",
-        "name": "Endurance",
-        "type": "gloriana",
-        "faction": "Death Guard",
-        "x": 390,
-        "y": 170
-      },
-      {
-        "id": "ship-2",
-        "name": "Croisade Éternelle",
-        "type": "croiseur",
-        "faction": "Black Templars",
-        "x": 280,
-        "y": 200
-      },
-      {
-        "id": "ship-3",
-        "name": "Conqueror",
-        "type": "gloriana",
-        "faction": "World Eaters",
-        "x": 450,
-        "y": 310
-      }
     ]
   }
 }

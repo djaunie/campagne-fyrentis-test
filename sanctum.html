@@ -220,7 +220,7 @@
         <button type="button" id="clear-ships-btn">Retirer les vaisseaux</button>
         <button type="button" id="clear-flags-btn">Retirer les drapeaux</button>
       </div>
-      <p class="editor-help">Clique sur une planète pour y planter un drapeau. Fais glisser un vaisseau pour le déplacer. Clic droit sur un drapeau pour le retirer individuellement.</p>
+      <p class="editor-help">Clic droit sur une planète pour y planter le drapeau de la faction sélectionnée. Clic droit sur un drapeau existant pour le retirer. Fais glisser un vaisseau pour le déplacer.</p>
     </div>
 
     <div class="figures-section" id="figures-section" style="display:none">
@@ -573,7 +573,7 @@
     const currentFlag = state.flags[pid];
     const flagInfo = currentFlag ? FACTION_FLAG_STYLES[currentFlag] : null;
     const flagBlock = flagInfo
-      ? `<div class="pd-section"><h4>Occupation visible</h4><div class="tags"><span class="tag gold">Drapeau : ${flagInfo.label}</span></div><div class="flag-actions"><button type="button" class="inline-action-btn" id="remove-flag-btn" data-pid="${pid}">Retirer le drapeau</button></div><p class="inline-help">Astuce : tu peux aussi faire un clic droit directement sur le drapeau dans l'orrérie.</p></div>`
+      ? `<div class="pd-section"><h4>Occupation visible</h4><div class="tags"><span class="tag gold">Drapeau : ${flagInfo.label}</span></div><div class="flag-actions"><button type="button" class="inline-action-btn" id="remove-flag-btn" data-pid="${pid}">Retirer le drapeau</button></div><p class="inline-help">Astuce : fais un clic droit sur le drapeau directement dans l'orrérie pour le retirer.</p></div>`
       : '';
 
     if (pid === 'brokha') {
@@ -617,7 +617,7 @@
 
   function bindClicks(data) {
     document.querySelectorAll('.planet-group').forEach(g => {
-      g.addEventListener('click', () => {
+      g.addEventListener('contextmenu', ev => { ev.preventDefault();
         const pid = g.dataset.pid;
         showDetail(data, pid);
         setPlanetFlag(pid);
@@ -627,7 +627,6 @@
           e.preventDefault();
           const pid = g.dataset.pid;
           showDetail(data, pid);
-          setPlanetFlag(pid);
         }
       });
     });

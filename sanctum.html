@@ -620,7 +620,11 @@
       g.addEventListener('contextmenu', ev => { ev.preventDefault();
         const pid = g.dataset.pid;
         showDetail(data, pid);
-        setPlanetFlag(pid);
+        if (state.flags[pid]) {
+          removePlanetFlag(pid);
+        } else {
+          setPlanetFlag(pid);
+        }
       });
       g.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {

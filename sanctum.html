@@ -66,7 +66,8 @@
     @keyframes danger-blink { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
     .danger-4 .planet-bg { animation: danger-blink 1.8s ease-in-out infinite; }
 
-    .flag-group { cursor: pointer; }
+    .flag-group { cursor: context-menu; }
+    .flag-group:hover { filter: brightness(1.15); }
     .flag-label { font-family: 'Cinzel', serif; font-size: 7px; fill: var(--text); pointer-events: none; }
     .ship-token { cursor: grab; }
     .ship-token.dragging { cursor: grabbing; }
@@ -103,6 +104,10 @@
     .danger-bar { display: flex; gap: 3px; margin-top: 0.5rem; }
     .danger-pip { width: 14px; height: 6px; border-radius: 2px; background: var(--faint); }
     .danger-pip.on { background: var(--red-bright); }
+    .flag-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.55rem; }
+    .inline-action-btn { background: rgba(139,28,28,0.12); color: var(--red-bright); border: 1px solid var(--red); padding: 0.35rem 0.65rem; border-radius: 4px; font-size: 0.76rem; cursor: pointer; transition: 0.2s ease; }
+    .inline-action-btn:hover { background: rgba(139,28,28,0.22); }
+    .inline-help { font-size: 0.72rem; color: var(--muted); line-height: 1.4; margin-top: 0.45rem; }
 
     .editor-section { padding: 1rem 1.25rem 1.25rem; border-top: 1px solid var(--border); }
     .editor-section h3 { font-family: 'Cinzel', serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-dim); margin-bottom: 0.7rem; }
@@ -215,7 +220,7 @@
         <button type="button" id="clear-ships-btn">Retirer les vaisseaux</button>
         <button type="button" id="clear-flags-btn">Retirer les drapeaux</button>
       </div>
-      <p class="editor-help">Clique sur une planète pour y planter un drapeau. Fais glisser un vaisseau pour le déplacer.</p>
+      <p class="editor-help">Clique sur une planète pour y planter un drapeau. Fais glisser un vaisseau pour le déplacer. Clic droit sur un drapeau pour le retirer individuellement.</p>
     </div>
 
     <div class="figures-section" id="figures-section" style="display:none">
@@ -276,9 +281,8 @@
     'forteresse-monastere': 'forteresse-monastere'
   };
 
-  // Positions SVG fixes pour les planètes spéciales (fortifications et lune)
   const SPECIAL_POSITIONS = {
-    'near_inner': null,   // calculé dynamiquement dans buildOrrery
+    'near_inner': null,
     'near_outer': null,
     'brokha_moon': null
   };
@@ -346,7 +350,7 @@
   const RADII = [70, 120, 185, 255, 330];
   const ANGLES = [-90, 45, 160, -30, 110];
 
-  const state = { system: null, planetPositions: {}, flags: {}, ships: [], shipCounter: 0, drag: null };
+  const state = { system: null, planetPositions: {}, flags: {}, ships: [], shipCounter: 0, drag: null, selectedPid: null };
 
   function polar(r, angleDeg) {
     const a = angleDeg * Math.PI / 180;
@@ -366,7 +370,6 @@
     html += `<path class="warp-path" d="M ${CX-300} ${CY+180} Q ${CX} ${CY-220} ${CX+320} ${CY+80}" />`;
     html += `<text x="${CX-180}" y="${CY+195}" font-size="7" fill="#7a5c9e" font-family="Crimson Text,serif" font-style="italic" opacity="0.7">Chemin warp naissant</text>`;
 
-    // Orbites uniquement pour les planètes orbitales (orbital_position non null)
     const orbitalPlanets = data.planets.filter(p => p.orbital_position !== null && p.orbital_position !== undefined);
     orbitalPlanets.forEach((_, i) => {
       html += `<circle class="orbit-ring" cx="${CX}" cy="${CY}" r="${RADII[i]}"/>`;
@@ -376,7 +379,6 @@
     html += `<circle cx="${CX}" cy="${CY}" r="20" fill="#ffe87a" filter="url(#planet-glow)"/>`;
     html += `<text x="${CX}" y="${CY+34}" text-anchor="middle" font-family="Cinzel,serif" font-size="7.5" fill="#c8a028" letter-spacing="0.05em">${data.star.name}</text>`;
 
-    // Planètes orbitales normales
     orbitalPlanets.forEach((p, i) => {
       const pos = polar(RADII[i], ANGLES[i]);
       state.planetPositions[String(p.id)] = { x: pos.x, y: pos.y };
@@ -390,7 +392,6 @@
           <text class="planet-sublabel" x="${pos.x}" y="${pos.y + r + 20}" text-anchor="middle">${p.type.split('—')[0].trim()}</text>
         </g>`;
 
-      // Lune Brokha attachée à Sanctum (id=1)
       if (p.id === 1) {
         state.planetPositions['brokha'] = { x: pos.x + 18, y: pos.y - 14 };
         html += `
@@ -401,7 +402,6 @@
       }
     });
 
-    // Positions SVG pour les planètes spéciales (svg_position défini)
     const specialPositions = {
       'near_inner': polar(RADII[0] - 30, 60),
       'near_outer': polar(RADII[1] + 30, 200),
@@ -413,7 +413,6 @@
       })()
     };
 
-    // Planètes spéciales (fortifications, lune nommée)
     const specialPlanets = data.planets.filter(p => p.svg_position);
     specialPlanets.forEach(p => {
       const pos = specialPositions[p.svg_position] || { x: CX + 50, y: CY - 50 };
@@ -435,6 +434,17 @@
     svg.insertAdjacentHTML('beforeend', html);
   }
 
+  function bindFlagInteractions() {
+    document.querySelectorAll('.flag-group').forEach(el => {
+      el.addEventListener('contextmenu', ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const pid = el.dataset.flagFor;
+        removePlanetFlag(pid);
+      });
+    });
+  }
+
   function renderFlags() {
     const layer = document.getElementById('flags-layer');
     if (!layer) return;
@@ -445,13 +455,14 @@
       if (!pos || !faction) return;
       const fx = pos.x + 12, fy = pos.y - 18;
       html += `
-        <g class="flag-group" data-flag-for="${pid}">
+        <g class="flag-group" data-flag-for="${pid}" role="button" aria-label="Retirer le drapeau de ${pid}">
           <line x1="${fx}" y1="${fy}" x2="${fx}" y2="${fy+18}" stroke="${faction.color}" stroke-width="1.4"/>
           <path d="M ${fx} ${fy} L ${fx+13} ${fy+4} L ${fx} ${fy+8} Z" fill="${faction.color}" stroke="#111" stroke-width="0.5"/>
           <text class="flag-label" x="${fx+16}" y="${fy+7}">${faction.short}</text>
         </g>`;
     });
     layer.innerHTML = html;
+    bindFlagInteractions();
   }
 
   function renderShips() {
@@ -490,6 +501,7 @@
   function clearFlags() {
     state.flags = {};
     renderFlags();
+    if (state.selectedPid) showDetail(state.system, state.selectedPid);
     saveTacticalState();
   }
 
@@ -497,6 +509,15 @@
     const faction = document.getElementById('faction-select').value;
     state.flags[pid] = faction;
     renderFlags();
+    showDetail(state.system, pid);
+    saveTacticalState();
+  }
+
+  function removePlanetFlag(pid) {
+    if (!state.flags[pid]) return;
+    delete state.flags[pid];
+    renderFlags();
+    showDetail(state.system, pid);
     saveTacticalState();
   }
 
@@ -531,7 +552,18 @@
     svg.addEventListener('pointerleave', endDrag);
   }
 
+  function bindDetailActions() {
+    const removeBtn = document.getElementById('remove-flag-btn');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        const pid = removeBtn.dataset.pid;
+        removePlanetFlag(pid);
+      });
+    }
+  }
+
   function showDetail(data, pid) {
+    state.selectedPid = pid;
     document.querySelectorAll('.planet-group').forEach(g => g.classList.remove('selected'));
     document.querySelectorAll('[data-pid="' + pid + '"]').forEach(g => g.classList.add('selected'));
 
@@ -541,10 +573,9 @@
     const currentFlag = state.flags[pid];
     const flagInfo = currentFlag ? FACTION_FLAG_STYLES[currentFlag] : null;
     const flagBlock = flagInfo
-      ? `<div class="pd-section"><h4>Occupation visible</h4><div class="tags"><span class="tag gold">Drapeau : ${flagInfo.label}</span></div></div>`
+      ? `<div class="pd-section"><h4>Occupation visible</h4><div class="tags"><span class="tag gold">Drapeau : ${flagInfo.label}</span></div><div class="flag-actions"><button type="button" class="inline-action-btn" id="remove-flag-btn" data-pid="${pid}">Retirer le drapeau</button></div><p class="inline-help">Astuce : tu peux aussi faire un clic droit directement sur le drapeau dans l'orrérie.</p></div>`
       : '';
 
-    // Cas spécial : lune Brokha (affichée séparément sur la carte mais pas dans planets)
     if (pid === 'brokha') {
       html = `<div class="planet-detail active">
         <p class="pd-eyebrow">Lune de Sanctum — Fortification</p>
@@ -557,7 +588,6 @@
         <div class="pd-section"><h4>Niveau de danger</h4>${dangerPips(1)}</div>
       </div>`;
     } else {
-      // Toutes les planètes (orbitales + spéciales) sont dans data.planets
       const p = data.planets.find(pl => String(pl.id) === String(pid));
       if (p) {
         const scls = statusClass(p.imperial_status);
@@ -582,6 +612,7 @@
     }
 
     zone.innerHTML = html || '<div class="empty-state"><div class="empty-state-icon">◈</div><p>Aucune donnée disponible.</p></div>';
+    bindDetailActions();
   }
 
   function bindClicks(data) {

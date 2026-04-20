@@ -136,7 +136,7 @@
         "type": "Forteresse lune — QG Black Templars",
         "imperial_status": "Opérationnel — QG de Croisade",
         "description": "Forteresse stellaire lourde implantée sur la lune Brokha de Sanctum. Siège de la présence des Black Templars et quartier général de la Croisade Fyrentis. Sénéchal Manfred y commande les forces alliées.",
-        "danger_level": 1,
+        "danger_level": 5,
         "color_hex": "#aaaaaa",
         "svg_position": "brokha_moon",
         "notable_features": [

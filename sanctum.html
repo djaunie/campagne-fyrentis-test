@@ -198,7 +198,7 @@
         <label for="ship-type">Type de vaisseau</label>
         <select id="ship-type">
           <option value="barge-bataille">Barge de bataille</option>
-          <option value="croiseur-attaque">Croiseur d’attaque</option>
+          <option value="croiseur-attaque">Croiseur d'attaque</option>
           <option value="croiseur-lourd">Croiseur lourd</option>
           <option value="cuirasse-classe-gloriana">Cuirassé de classe Gloriana</option>
           <option value="destroyer-classe-gladius">Destroyer de classe Gladius</option>
@@ -276,22 +276,12 @@
     'forteresse-monastere': 'forteresse-monastere'
   };
 
-  const BASTION_DATA = [
-    {
-      pid: 'bastion1', color: '#c8a028', r: 7, label: 'B.Alpha', sublabel: 'Fortin stellaire',
-      eyebrow: 'Fortification Orbitale — Système Sanctum',
-      danger_level: 1,
-      notable_features: ['Garnison Astartes — Black Templars', 'Armement lourd', 'Première ligne de défense'],
-      imperial_status_label: '⚔ Opérationnel', imperial_status_class: 'ok'
-    },
-    {
-      pid: 'bastion2', color: '#c85a1a', r: 7, label: 'B.Beta', sublabel: 'Forteresse',
-      eyebrow: 'Fortification Orbitale — Système Sanctum',
-      danger_level: 3,
-      notable_features: ['Construction inachevée', 'Défenses incomplètes', 'Priorité Mechanicus & Black Templars'],
-      imperial_status_label: '⚠ Inachevé — Vulnérable', imperial_status_class: 'warn'
-    }
-  ];
+  // Positions SVG fixes pour les planètes spéciales (fortifications et lune)
+  const SPECIAL_POSITIONS = {
+    'near_inner': null,   // calculé dynamiquement dans buildOrrery
+    'near_outer': null,
+    'brokha_moon': null
+  };
 
   function normalizeShipType(type) {
     if (SHIP_STYLES[type]) return type;
@@ -309,11 +299,7 @@
 
   function purgeLegacyStorage() {
     LEGACY_STORAGE_KEYS.forEach(key => {
-      try {
-        localStorage.removeItem(key);
-      } catch (e) {
-        console.warn('Purge stockage legacy impossible :', e);
-      }
+      try { localStorage.removeItem(key); } catch (e) { console.warn('Purge stockage legacy impossible :', e); }
     });
   }
 
@@ -324,9 +310,7 @@
         ships: state.ships,
         shipCounter: state.shipCounter
       }));
-    } catch (e) {
-      console.warn('Sauvegarde impossible :', e);
-    }
+    } catch (e) { console.warn('Sauvegarde impossible :', e); }
   }
 
   function loadTacticalState() {
@@ -339,10 +323,7 @@
         ships: normalizeShips(parsed.ships),
         shipCounter: Number.isFinite(parsed.shipCounter) ? parsed.shipCounter : null
       };
-    } catch (e) {
-      console.warn('Chargement sauvegarde impossible :', e);
-      return null;
-    }
+    } catch (e) { console.warn('Chargement sauvegarde impossible :', e); return null; }
   }
 
   function statusClass(status) {
@@ -350,6 +331,8 @@
     const s = status.toLowerCase();
     if (s.includes('mechanicus')) return 'mech';
     if (s.includes('chaos') || s.includes('contesté')) return 'contested';
+    if (s.includes('inachevé') || s.includes('vulnérable')) return 'warn';
+    if (s.includes('opérationnel')) return 'ok';
     return 'imp';
   }
 
@@ -383,7 +366,9 @@
     html += `<path class="warp-path" d="M ${CX-300} ${CY+180} Q ${CX} ${CY-220} ${CX+320} ${CY+80}" />`;
     html += `<text x="${CX-180}" y="${CY+195}" font-size="7" fill="#7a5c9e" font-family="Crimson Text,serif" font-style="italic" opacity="0.7">Chemin warp naissant</text>`;
 
-    data.planets.forEach((_, i) => {
+    // Orbites uniquement pour les planètes orbitales (orbital_position non null)
+    const orbitalPlanets = data.planets.filter(p => p.orbital_position !== null && p.orbital_position !== undefined);
+    orbitalPlanets.forEach((_, i) => {
       html += `<circle class="orbit-ring" cx="${CX}" cy="${CY}" r="${RADII[i]}"/>`;
     });
 
@@ -391,7 +376,8 @@
     html += `<circle cx="${CX}" cy="${CY}" r="20" fill="#ffe87a" filter="url(#planet-glow)"/>`;
     html += `<text x="${CX}" y="${CY+34}" text-anchor="middle" font-family="Cinzel,serif" font-size="7.5" fill="#c8a028" letter-spacing="0.05em">${data.star.name}</text>`;
 
-    data.planets.forEach((p, i) => {
+    // Planètes orbitales normales
+    orbitalPlanets.forEach((p, i) => {
       const pos = polar(RADII[i], ANGLES[i]);
       state.planetPositions[String(p.id)] = { x: pos.x, y: pos.y };
       const r = i === 2 ? 12 : i >= 3 ? 8 : 10;
@@ -403,6 +389,8 @@
           <text class="planet-label" x="${pos.x}" y="${pos.y + r + 11}" text-anchor="middle">${p.name}</text>
           <text class="planet-sublabel" x="${pos.x}" y="${pos.y + r + 20}" text-anchor="middle">${p.type.split('—')[0].trim()}</text>
         </g>`;
+
+      // Lune Brokha attachée à Sanctum (id=1)
       if (p.id === 1) {
         state.planetPositions['brokha'] = { x: pos.x + 18, y: pos.y - 14 };
         html += `
@@ -413,16 +401,32 @@
       }
     });
 
-    const bpos = [ polar(RADII[0] - 30, 60), polar(RADII[1] + 30, 200) ];
-    BASTION_DATA.forEach((bd, i) => {
-      const bp = bpos[i];
-      state.planetPositions[bd.pid] = { x: bp.x, y: bp.y };
+    // Positions SVG pour les planètes spéciales (svg_position défini)
+    const specialPositions = {
+      'near_inner': polar(RADII[0] - 30, 60),
+      'near_outer': polar(RADII[1] + 30, 200),
+      'brokha_moon': (() => {
+        const sanctum = orbitalPlanets.find(p => p.id === 1);
+        if (!sanctum) return { x: CX + 40, y: CY - 50 };
+        const sp = polar(RADII[0], ANGLES[0]);
+        return { x: sp.x + 18, y: sp.y - 14 };
+      })()
+    };
+
+    // Planètes spéciales (fortifications, lune nommée)
+    const specialPlanets = data.planets.filter(p => p.svg_position);
+    specialPlanets.forEach(p => {
+      const pos = specialPositions[p.svg_position] || { x: CX + 50, y: CY - 50 };
+      state.planetPositions[String(p.id)] = { x: pos.x, y: pos.y };
+      const r = 7;
+      const dangerCls = p.danger_level >= 4 ? ' danger-4' : '';
+      const shortLabel = p.name.length > 12 ? p.name.split(' ')[0] + '…' : p.name;
       html += `
-        <g class="planet-group" data-pid="${bd.pid}" tabindex="0" role="button" aria-label="${bd.label}">
-          <circle cx="${bp.x}" cy="${bp.y}" r="${bd.r+8}" fill="${bd.color}" opacity="0.08"/>
-          <circle class="planet-bg" cx="${bp.x}" cy="${bp.y}" r="${bd.r}" fill="${bd.color}" stroke="${bd.color}" stroke-width="0.8" filter="url(#planet-glow)"/>
-          <text class="planet-label" x="${bp.x}" y="${bp.y + bd.r + 11}" text-anchor="middle">${bd.label}</text>
-          <text class="planet-sublabel" x="${bp.x}" y="${bp.y + bd.r + 20}" text-anchor="middle">${bd.sublabel}</text>
+        <g class="planet-group${dangerCls}" data-pid="${p.id}" tabindex="0" role="button" aria-label="${p.name}">
+          <circle cx="${pos.x}" cy="${pos.y}" r="${r+8}" fill="${p.color_hex}" opacity="0.08"/>
+          <circle class="planet-bg" cx="${pos.x}" cy="${pos.y}" r="${r}" fill="${p.color_hex}" stroke="${p.color_hex}" stroke-width="0.8" filter="url(#planet-glow)"/>
+          <text class="planet-label" x="${pos.x}" y="${pos.y + r + 11}" text-anchor="middle">${shortLabel}</text>
+          <text class="planet-sublabel" x="${pos.x}" y="${pos.y + r + 20}" text-anchor="middle">${p.type.split('—')[0].trim()}</text>
         </g>`;
     });
 
@@ -540,43 +544,34 @@
       ? `<div class="pd-section"><h4>Occupation visible</h4><div class="tags"><span class="tag gold">Drapeau : ${flagInfo.label}</span></div></div>`
       : '';
 
+    // Cas spécial : lune Brokha (affichée séparément sur la carte mais pas dans planets)
     if (pid === 'brokha') {
       html = `<div class="planet-detail active">
         <p class="pd-eyebrow">Lune de Sanctum — Fortification</p>
         <h3 class="pd-name">Brokha</h3>
-        <p class="pd-type">Lune — Bastion Chapitral</p>
+        <p class="pd-type">Lune — Fortification Chapitrale</p>
         <span class="pd-status ok">✠ Opérationnel — QG de Croisade</span>
         <p class="pd-desc">Forteresse stellaire lourde implantée sur la lune Brokha. Siège de la présence des Black Templars dans le système et quartier général de la Croisade Fyrentis. Le Sénéchal Manfred y commande l'ensemble des forces alliées du sous-secteur.</p>
         ${flagBlock}
         <div class="pd-section"><h4>Installations</h4><div class="tags"><span class="tag gold">✠ QG Croisade</span><span class="tag">Forteresse stellaire lourde</span><span class="tag">Garnison Astartes</span></div></div>
         <div class="pd-section"><h4>Niveau de danger</h4>${dangerPips(1)}</div>
       </div>`;
-    } else if (pid === 'bastion1' || pid === 'bastion2') {
-      const idx = pid === 'bastion1' ? 0 : 1;
-      const b = data.bastions[idx];
-      const bd = BASTION_DATA[idx];
-      if (b) {
-        const featuresHTML = bd.notable_features.map(f => `<span class="tag">${f}</span>`).join('');
-        html = `<div class="planet-detail active">
-          <p class="pd-eyebrow">${bd.eyebrow}</p>
-          <h3 class="pd-name">${b.name}</h3>
-          <p class="pd-type">${b.type}</p>
-          <span class="pd-status ${bd.imperial_status_class}">${bd.imperial_status_label}</span>
-          <p class="pd-desc">${b.description}</p>
-          ${flagBlock}
-          <div class="pd-section"><h4>Caractéristiques</h4><div class="tags">${featuresHTML}</div></div>
-          <div class="pd-section"><h4>Niveau de danger</h4>${dangerPips(bd.danger_level)}</div>
-        </div>`;
-      }
     } else {
-      const p = data.planets.find(pl => pl.id === parseInt(pid));
+      // Toutes les planètes (orbitales + spéciales) sont dans data.planets
+      const p = data.planets.find(pl => String(pl.id) === String(pid));
       if (p) {
         const scls = statusClass(p.imperial_status);
         const featuresHTML = p.notable_features.map(f => `<span class="tag">${f}</span>`).join('');
+        const eyebrow = p.orbital_position
+          ? `Corps Céleste — Orbite ${p.orbital_position}`
+          : `Fortification — Système Sanctum`;
+        const subtitle = p.orbital_distance_au
+          ? `${p.type} &mdash; ${p.orbital_distance_au} UA`
+          : p.type;
         html = `<div class="planet-detail active">
-          <p class="pd-eyebrow">Corps Céleste — Orbite ${p.orbital_position}</p>
+          <p class="pd-eyebrow">${eyebrow}</p>
           <h3 class="pd-name">${p.name}</h3>
-          <p class="pd-type">${p.type} &mdash; ${p.orbital_distance_au} UA</p>
+          <p class="pd-type">${subtitle}</p>
           <span class="pd-status ${scls}">${p.imperial_status}</span>
           <p class="pd-desc">${p.description}</p>
           ${flagBlock}

@@ -72,7 +72,7 @@
     .ship-token { cursor: grab; }
     .ship-token.dragging { cursor: grabbing; }
     .ship-body { stroke: #111; stroke-width: 0.9; }
-    .ship-label { font-size: 6.5px; fill: var(--text); pointer-events: none; font-family: 'Crimson Text', serif; }
+    .ship-label { font-size: 5.8px; fill: var(--text); pointer-events: none; font-family: 'Crimson Text', serif; }
     .ship-hitbox { fill: transparent; }
 
     .sidebar { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
@@ -220,7 +220,7 @@
         <button type="button" id="clear-ships-btn">Retirer les vaisseaux</button>
         <button type="button" id="clear-flags-btn">Retirer les drapeaux</button>
       </div>
-      <p class="editor-help">Clic droit sur une planète pour y planter le drapeau de la faction sélectionnée. Clic droit sur un drapeau existant pour le retirer. Fais glisser un vaisseau pour le déplacer.</p>
+      <p class="editor-help">Clic droit sur une planète pour y planter le drapeau de la faction sélectionnée. Clic droit sur un drapeau existant pour le retirer. Fais glisser un vaisseau pour le déplacer. <strong style="color:var(--gold-dim)">Clic droit sur un vaisseau</strong> pour le supprimer instantanément.</p>
     </div>
 
     <div class="figures-section" id="figures-section" style="display:none">
@@ -266,6 +266,20 @@
     'transport-logistique':     { color: '#6b8c3a', short: 'TL'  },
     'transport-troupe':         { color: '#d4882a', short: 'TT'  },
     'vaisseau-commandement':    { color: '#aaccff', short: 'VC'  }
+  };
+
+  const SHIP_TYPE_LABELS = {
+    'barge-bataille':           'Barge de Bataille',
+    'croiseur-attaque':         "Croiseur d'Attaque",
+    'croiseur-lourd':           'Croiseur Lourd',
+    'cuirasse-classe-gloriana': 'Cuirassé Gloriana',
+    'destroyer-classe-gladius': 'Destroyer Gladius',
+    'destroyer-classe-hunter':  'Destroyer Hunter',
+    'destroyer-classe-nova':    'Destroyer Nova',
+    'forteresse-monastere':     'Forteresse Monastère',
+    'transport-logistique':     'Transport Logistique',
+    'transport-troupe':         'Transport de Troupe',
+    'vaisseau-commandement':    'Vaisseau de Commandement'
   };
 
   const LEGACY_SHIP_TYPE_MAP = {
@@ -468,26 +482,57 @@
   function renderShips() {
     const layer = document.getElementById('ships-layer');
     if (!layer) return;
+
     let html = '';
     state.ships.forEach(ship => {
       const normalizedType = normalizeShipType(ship.type);
       const style = SHIP_STYLES[normalizedType];
+      const displayName = ship.name || style.short;
+
       html += `
         <g class="ship-token" data-ship-id="${ship.id}" transform="translate(${ship.x}, ${ship.y})">
-          <circle class="ship-hitbox" cx="0" cy="0" r="12"></circle>
+          <circle class="ship-hitbox" cx="0" cy="0" r="14"></circle>
           <path class="ship-body" d="M -8 0 L 0 -6 L 8 0 L 0 6 Z" fill="${style.color}"></path>
           <circle cx="0" cy="0" r="2.2" fill="#111"></circle>
-          <text class="ship-label" x="0" y="16" text-anchor="middle">${style.short}</text>
+          <text class="ship-label" x="0" y="20" text-anchor="middle">${displayName}</text>
         </g>`;
     });
+
     layer.innerHTML = html;
     bindShipDragging();
+
+    layer.querySelectorAll('.ship-token').forEach(el => {
+      el.addEventListener('contextmenu', ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        const id = el.dataset.shipId;
+        state.ships = state.ships.filter(s => s.id !== id);
+
+        renderShips();
+        saveTacticalState();
+      });
+    });
   }
 
   function addShip() {
     const type = normalizeShipType(document.getElementById('ship-type').value);
+    const factionKey = document.getElementById('faction-select').value;
+    const factionLabel = FACTION_FLAG_STYLES[factionKey]
+      ? FACTION_FLAG_STYLES[factionKey].label
+      : factionKey;
+    const typeLabel = SHIP_TYPE_LABELS[type] || type;
+    const shipName = typeLabel + ' – ' + factionLabel;
+
     state.shipCounter += 1;
-    state.ships.push({ id: 'ship-' + state.shipCounter, type, x: CX + 140, y: CY - 120 });
+    state.ships.push({
+      id: 'ship-' + state.shipCounter,
+      type,
+      name: shipName,
+      x: CX + 140,
+      y: CY - 120
+    });
+
     renderShips();
     saveTacticalState();
   }
